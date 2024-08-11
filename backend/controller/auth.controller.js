@@ -7,19 +7,17 @@ export const signup = async (req, res) => {
     const { username, email, password, role } = req.body;
 
     // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@classroom\.com$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ error: "Invalid email format" });
+      return res.status(400).json({ error: "Invalid email format. Must be 'something@classroom.com'" });
     }
 
     // Check if email already exists
     const existingEmail = await User.findOne({ email });
     if (existingEmail) return res.status(400).json({ error: "Email is already taken" });
-    
 
     // Validate password length
     if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters long" });
-    
 
     // Hash the password
     const salt = await bcrypt.genSalt(10);
@@ -51,7 +49,13 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if(!email || !password) return res.status(401).json({ error:"All fields are required"})
+    if (!email || !password) return res.status(401).json({ error: "All fields are required" });
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@classroom\.com$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format. Must be 'something@classroom.com'" });
+    }
 
     // Find user by email
     const user = await User.findOne({ email });
@@ -82,11 +86,11 @@ export const login = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-	try {
-		res.cookie("jwt", "", { maxAge: 0 });
-		res.status(200).json({ message: "Logged out successfully" });
-	} catch (error) {
-		console.log("Error in logout controller", error.message);
-		res.status(500).json({ error: "Internal Server Error" });
-	}
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logout controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
